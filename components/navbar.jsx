@@ -1,6 +1,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
+import { IconClipboardHeart } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -12,20 +13,23 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { useTheme } from "next-themes"
-import { ModeToggle } from "./ui/mode-toggle"
+import { Icon } from "lucide-react"
 
 export function Navbar() {
   const { setTheme, theme } = useTheme()
 
   return (
     (<div className="border-b">
-      <div className="container flex h-16 items-center px-4">
+      <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <span className="font-bold text-xl text-teal-600">MedSpace</span>
+                  <span className="font-bold text-xl text-teal-600 flex items-center">
+                   <IconClipboardHeart />
+                    MedSpace
+                  </span>
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
@@ -61,8 +65,21 @@ export function Navbar() {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="ml-auto flex items-center space-x-4">
-         <ModeToggle />
-          <Button className="bg-teal-600 hover:bg-teal-700">Sign Up</Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle Theme"
+            className="mr-6"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            <SunIcon
+              className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <MoonIcon
+              className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle Theme</span>
+          </Button>
+          <Button  className="bg-teal-600 hover:bg-teal-700">
+            <Link href={'/login'}>Sign Up</Link>
+          </Button>
         </div>
       </div>
     </div>)

@@ -1,14 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Bookmark, Search } from 'lucide-react'
+import { Bookmark, Search, CheckCircle } from 'lucide-react'
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const publications = [
   { 
@@ -47,15 +54,32 @@ export default function Publications() {
   const [searchTerm, setSearchTerm] = useState('')
   const [readLater, setReadLater] = useState([])
   const [showReadLater, setShowReadLater] = useState(false)
+  const [visitedPublications, setVisitedPublications] = useState([])
+  const [filter, setFilter] = useState('all')
+
+  useEffect(() => {
+    // In a real application, you would fetch this data from an API or local storage
+    setVisitedPublications([1, 3, 5])
+  }, [])
 
   const filteredPublications = publications.filter(pub =>
     (pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pub.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filter === 'all' ||
+    (filter === 'read' && visitedPublications.includes(pub.id)) ||
+    (filter === 'unread' && !visitedPublications.includes(pub.id))) &&
     (!showReadLater || readLater.includes(pub.id)))
 
   const toggleReadLater = (id) => {
     setReadLater(prev => 
       prev.includes(id) ? prev.filter(pubId => pubId !== id) : [...prev, id])
+  }
+
+  const handleReadArticle = (id) => {
+    if (!visitedPublications.includes(id)) {
+      setVisitedPublications(prev => [...prev, id])
+    }
+    // In a real application, you would navigate to the article page here
   }
 
   return (
@@ -75,12 +99,24 @@ export default function Publications() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="read-later-mode"
-              checked={showReadLater}
-              onCheckedChange={setShowReadLater} />
-            <Label htmlFor="read-later-mode">Show Read Later</Label>
+          <div className="flex items-center space-x-4">
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Publications</SelectItem>
+                <SelectItem value="read">Read</SelectItem>
+                <SelectItem value="unread">Unread</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="read-later-mode"
+                checked={showReadLater}
+                onCheckedChange={setShowReadLater} />
+              <Label htmlFor="read-later-mode">Show Read Later</Label>
+            </div>
           </div>
         </div>
         <div className="space-y-4">
@@ -89,22 +125,31 @@ export default function Publications() {
               <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-700 text-white p-4">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg font-semibold">{pub.title}</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => toggleReadLater(pub.id)}
-                    className="text-white hover:text-teal-200">
-                    <Bookmark className={`h-5 w-5 ${readLater.includes(pub.id) ? 'fill-current' : ''}`} />
-                    <span className="sr-only">
-                      {readLater.includes(pub.id) ? 'Remove from Read Later' : 'Add to Read Later'}
-                    </span>
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    {visitedPublications.includes(pub.id) && (
+                      <CheckCircle className="h-5 w-5 text-green-300" />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleReadLater(pub.id)}
+                      className="text-white hover:text-teal-200">
+                      <Bookmark className={`h-5 w-5 ${readLater.includes(pub.id) ? 'fill-current' : ''}`} />
+                      <span className="sr-only">
+                        {readLater.includes(pub.id) ? 'Remove from Read Later' : 'Add to Read Later'}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-4 flex justify-between items-center">
                 <Badge variant="secondary">{pub.category}</Badge>
-                <Button variant="outline" size="sm" className="text-teal-600 hover:text-teal-700">
-                  Read Full Article
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-teal-600 hover:text-teal-700"
+                  onClick={() => handleReadArticle(pub.id)}>
+                  {visitedPublications.includes(pub.id) ? 'Read Again' : 'Read Full Article'}
                 </Button>
               </CardContent>
             </Card>
