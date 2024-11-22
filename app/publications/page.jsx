@@ -72,7 +72,7 @@ export default function Publications() {
     const matchesFilter = filter === 'all' || 
       (filter === 'read' && isSaved) || 
       (filter === 'unread' && !isSaved)
-    const matchesFavorites = !showFavorites || (isSaved && savedPublications.find(saved => saved.publication_id === pub.id)?.favourite)
+    const matchesFavorites = !showFavorites || (isSaved && savedPublications.find(saved => saved?.publication_id === pub.id)?.favourite)
     return matchesSearch && matchesFilter && matchesFavorites
   })
 
@@ -245,7 +245,7 @@ export default function Publications() {
             <h2 className="text-2xl font-bold text-teal-600 mb-4">Favorite Publications</h2>
             <div className="space-y-4">
               {favoritePublications.map(savedPub => {
-                const pub = publications.find(p => p.id === savedPub.publication_id)
+                const pub = publications.find(p => p.id === savedPub?.publication_id)
                 return pub ? renderPublicationCard(pub) : null
               })}
             </div>
