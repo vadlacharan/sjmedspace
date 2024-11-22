@@ -83,7 +83,7 @@ export default function Publications() {
     try {
       // Optimistic update
       setSavedPublications(prev => prev.map(pub => 
-        pub.publication_id === id ? { ...pub, favourite: !pub.favourite } : pub
+        pub?.publication_id === id ? { ...pub, favourite: !pub.favourite } : pub
       ))
 
       const response = await fetch("/api/savepublication", {
@@ -105,7 +105,7 @@ export default function Publications() {
     } catch (error) {
       // Revert optimistic update on error
       setSavedPublications(prev => prev.map(pub => 
-        pub.publication_id === id ? { ...pub, favourite: !pub.favourite } : pub
+        pub?.publication_id === id ? { ...pub, favourite: !pub.favourite } : pub
       ))
       setError("Error updating favorite status. Please try again.")
     } finally {
