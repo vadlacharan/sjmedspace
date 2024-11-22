@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Bookmark, Search, CheckCircle } from 'lucide-react'
+import { Search, CheckCircle, Heart } from 'lucide-react'
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import {
@@ -16,88 +16,207 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-const publications = [
-  { 
-    id: 1,
-    title: "Advancements in Telemedicine", 
-    category: "Technology",
-  },
-  { 
-    id: 2,
-    title: "AI in Medical Diagnosis", 
-    category: "Artificial Intelligence",
-  },
-  { 
-    id: 3,
-    title: "The Future of Personalized Medicine", 
-    category: "Research",
-  },
-  { 
-    id: 4,
-    title: "Ethical Considerations in Gene Therapy", 
-    category: "Ethics",
-  },
-  { 
-    id: 5,
-    title: "Nanotechnology in Drug Delivery", 
-    category: "Pharmacology",
-  },
-  { 
-    id: 6,
-    title: "Mental Health in the Digital Age", 
-    category: "Psychology",
-  },
-]
+import { useRouter } from 'next/navigation'
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Publications() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [readLater, setReadLater] = useState([])
-  const [showReadLater, setShowReadLater] = useState(false)
-  const [visitedPublications, setVisitedPublications] = useState([])
   const [filter, setFilter] = useState('all')
+  const [showFavorites, setShowFavorites] = useState(false)
+  const [publications, setPublications] = useState([])
+  const [savedPublications, setSavedPublications] = useState([])
+  const [error, setError] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState({})
+  const router = useRouter()
 
-  useEffect(() => {
-    // In a real application, you would fetch this data from an API or local storage
-    setVisitedPublications([1, 3, 5])
+  const fetchPublications = useCallback(async () => {
+    try {
+      const response = await fetch("/api/publications")
+      if (!response.ok) {
+        throw new Error('Failed to fetch publications')
+      }
+      const data = await response.json()
+      setPublications(data.publications)
+    } catch (error) {
+      setError("Error fetching publications. Please try again later.")
+    }
   }, [])
 
-  const filteredPublications = publications.filter(pub =>
-    (pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pub.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filter === 'all' ||
-    (filter === 'read' && visitedPublications.includes(pub.id)) ||
-    (filter === 'unread' && !visitedPublications.includes(pub.id))) &&
-    (!showReadLater || readLater.includes(pub.id)))
+  const fetchSavedPublications = useCallback(async () => {
+    try {
+      const response = await fetch("/api/savepublication")
+      if (!response.ok) {
+        throw new Error('Failed to fetch saved publications')
+      }
+      const data = await response.json()
+      setSavedPublications(data.savedpublications)
+    } catch (error) {
+      setError("Error fetching saved publications. Please try again later.")
+    }
+  }, [])
 
-  const toggleReadLater = (id) => {
-    setReadLater(prev => 
-      prev.includes(id) ? prev.filter(pubId => pubId !== id) : [...prev, id])
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      await Promise.all([fetchPublications(), fetchSavedPublications()])
+      setIsLoading(false)
+    }
+    fetchData()
+  }, [fetchPublications, fetchSavedPublications])
+
+  const filteredPublications = publications.filter(pub => {
+    const isSaved = savedPublications.some(saved => saved.publication_id === pub.id)
+    const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = filter === 'all' || 
+      (filter === 'read' && isSaved) || 
+      (filter === 'unread' && !isSaved)
+    const matchesFavorites = !showFavorites || (isSaved && savedPublications.find(saved => saved.publication_id === pub.id)?.favourite)
+    return matchesSearch && matchesFilter && matchesFavorites
+  })
+
+  const favoritePublications = savedPublications.filter(pub => pub?.favourite)
+
+  const toggleFavorite = async (id) => {
+    setIsFavoriteLoading(prev => ({ ...prev, [id]: true }))
+    try {
+      // Optimistic update
+      setSavedPublications(prev => prev.map(pub => 
+        pub.publication_id === id ? { ...pub, favourite: !pub.favourite } : pub
+      ))
+
+      const response = await fetch("/api/savepublication", {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id })
+      })
+      if (!response.ok) {
+        throw new Error('Failed to toggle favorite')
+      }
+      const updatedSavedPub = await response.json()
+      
+      // Update with server response
+      setSavedPublications(prev => prev.map(pub => 
+        pub.id === updatedSavedPub.id ? updatedSavedPub : pub
+      ))
+    } catch (error) {
+      // Revert optimistic update on error
+      setSavedPublications(prev => prev.map(pub => 
+        pub.publication_id === id ? { ...pub, favourite: !pub.favourite } : pub
+      ))
+      setError("Error updating favorite status. Please try again.")
+    } finally {
+      setIsFavoriteLoading(prev => ({ ...prev, [id]: false }))
+    }
   }
 
-  const handleReadArticle = (id) => {
-    if (!visitedPublications.includes(id)) {
-      setVisitedPublications(prev => [...prev, id])
+  const handleReadArticle = async (id) => {
+    try {
+      const response = await fetch("/api/savepublication", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id })
+      })
+      if (!response.ok) {
+        throw new Error('Failed to save publication')
+      }
+      const data = await response.json()
+      setSavedPublications(prev => [...prev, data.savedPublication])
+      router.push(data.link)
+    } catch (error) {
+      setError("Error saving publication. Please try again.")
     }
-    // In a real application, you would navigate to the article page here
+  }
+
+  const renderPublicationCard = (pub) => {
+    const savedPub = savedPublications.find(saved => saved?.publication_id === pub.id)
+    const isSaved = !!savedPub
+    const isFavorite = isSaved && savedPub.favourite
+
+    return (
+      <Card key={pub.id} className="overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-700 text-white p-4">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg font-semibold">{pub.title}</CardTitle>
+            <div className="flex items-center space-x-2">
+              {isSaved && (
+                <CheckCircle className="h-5 w-5 text-green-300" />
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => toggleFavorite(pub.id)}
+                className="text-white hover:text-teal-200"
+                disabled={isFavoriteLoading[pub.id]}
+              >
+                {isFavoriteLoading[pub.id] ? (
+                  <Skeleton className="h-5 w-5 rounded-full bg-white/50" />
+                ) : (
+                  <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
+                )}
+                <span className="sr-only">
+                  {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                </span>
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 flex justify-between items-center">
+          <Badge variant="secondary">{pub.category}</Badge>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-teal-600 hover:text-teal-700"
+            onClick={() => handleReadArticle(pub.id)}
+          >
+            {isSaved ? 'Read Again' : 'Read Full Article'}
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto mt-8 px-4">
+          <h1 className="text-4xl font-bold text-teal-600 mb-8">Publications</h1>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-40 w-full" />
+            ))}
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
-    (<div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto mt-8 px-4">
-        <h1 className="text-4xl font-bold text-teal-600 mb-8">Latest Publications</h1>
-        <div
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 className="text-4xl font-bold text-teal-600 mb-8">Publications</h1>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="relative flex-grow w-full sm:w-auto">
-            <Search
-              className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search publications..."
               className="pl-8 w-full"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} />
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <div className="flex items-center space-x-4">
             <Select value={filter} onValueChange={setFilter}>
@@ -112,54 +231,41 @@ export default function Publications() {
             </Select>
             <div className="flex items-center space-x-2">
               <Switch
-                id="read-later-mode"
-                checked={showReadLater}
-                onCheckedChange={setShowReadLater} />
-              <Label htmlFor="read-later-mode">Show Read Later</Label>
+                id="show-favorites"
+                checked={showFavorites}
+                onCheckedChange={setShowFavorites}
+              />
+              <Label htmlFor="show-favorites">Show Favorites</Label>
             </div>
           </div>
         </div>
-        <div className="space-y-4">
-          {filteredPublications.map((pub) => (
-            <Card key={pub.id} className="overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-700 text-white p-4">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg font-semibold">{pub.title}</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    {visitedPublications.includes(pub.id) && (
-                      <CheckCircle className="h-5 w-5 text-green-300" />
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => toggleReadLater(pub.id)}
-                      className="text-white hover:text-teal-200">
-                      <Bookmark className={`h-5 w-5 ${readLater.includes(pub.id) ? 'fill-current' : ''}`} />
-                      <span className="sr-only">
-                        {readLater.includes(pub.id) ? 'Remove from Read Later' : 'Add to Read Later'}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 flex justify-between items-center">
-                <Badge variant="secondary">{pub.category}</Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-teal-600 hover:text-teal-700"
-                  onClick={() => handleReadArticle(pub.id)}>
-                  {visitedPublications.includes(pub.id) ? 'Read Again' : 'Read Full Article'}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        {filteredPublications.length === 0 && (
-          <p className="text-center text-muted-foreground mt-8">No publications found.</p>
+
+        {showFavorites ? (
+          <div>
+            <h2 className="text-2xl font-bold text-teal-600 mb-4">Favorite Publications</h2>
+            <div className="space-y-4">
+              {favoritePublications.map(savedPub => {
+                const pub = publications.find(p => p.id === savedPub.publication_id)
+                return pub ? renderPublicationCard(pub) : null
+              })}
+            </div>
+            {favoritePublications.length === 0 && (
+              <p className="text-center text-muted-foreground">No favorite publications yet.</p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-2xl font-bold text-teal-600 mb-4">All Publications</h2>
+            <div className="space-y-4">
+              {filteredPublications.map(renderPublicationCard)}
+            </div>
+            {filteredPublications.length === 0 && !error && (
+              <p className="text-center text-muted-foreground mt-8">No publications found.</p>
+            )}
+          </div>
         )}
       </main>
-    </div>)
-  );
+    </div>
+  )
 }
 
