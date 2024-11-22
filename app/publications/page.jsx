@@ -67,7 +67,7 @@ export default function Publications() {
   }, [fetchPublications, fetchSavedPublications])
 
   const filteredPublications = publications.filter(pub => {
-    const isSaved = savedPublications.some(saved => saved.publication_id === pub.id)
+    const isSaved = savedPublications.some(saved => saved?.publication_id === pub.id)
     const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filter === 'all' || 
       (filter === 'read' && isSaved) || 
