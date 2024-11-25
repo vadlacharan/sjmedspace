@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import Link from "next/link"
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
@@ -14,9 +15,10 @@ import {
 } from "@/components/ui/navigation-menu"
 import { useTheme } from "next-themes"
 import { Icon } from "lucide-react"
+import { createClient } from "@/utils/supabase/client"
 
 export function Navbar() {
-  const { setTheme, theme } = useTheme()
+
 
   return (
     (<div className="border-b">
@@ -27,8 +29,7 @@ export function Navbar() {
               <Link href="/" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   <span className="font-bold text-xl text-teal-600 flex items-center">
-                   <IconClipboardHeart />
-                    MedSpace
+                    SJM
                   </span>
                 </NavigationMenuLink>
               </Link>
