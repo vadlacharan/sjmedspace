@@ -79,7 +79,7 @@ export default function Publications() {
   const favoritePublications = savedPublications.filter(pub => pub?.favourite)
 
   const toggleFavorite = async (id) => {
-    setIsFavoriteLoading(prev => ({ ...prev, [id]: true }))
+    setIsFavoriteLoading(prev => ({ ...prev, [id]: false }))
     try {
       // Optimistic update
       setSavedPublications(prev => prev.map(pub => 
