@@ -19,6 +19,7 @@ import { createClient } from "@/utils/supabase/client"
 
 export function Navbar() {
 
+  const { setTheme, theme } = useTheme()
 
   return (
     (<div className="border-b">
