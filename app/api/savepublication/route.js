@@ -65,7 +65,7 @@ export async function POST(request,response){
 
 export async function PUT(request,response){
     const { id } = await request.json()
-   console.log(id)
+
     const supabase = await createClient()
     const { data: { user }} = await supabase.auth.getUser()
     
