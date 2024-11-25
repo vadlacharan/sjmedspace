@@ -67,12 +67,12 @@ export default function Publications() {
   }, [fetchPublications, fetchSavedPublications])
 
   const filteredPublications = publications.filter(pub => {
-    const isSaved = savedPublications.some(saved => saved?.publication_id === pub.id)
+    const isSaved = savedPublications.some(saved => saved?.publication_id === pub?.id)
     const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filter === 'all' || 
       (filter === 'read' && isSaved) || 
       (filter === 'unread' && !isSaved)
-    const matchesFavorites = !showFavorites || (isSaved && savedPublications.find(saved => saved?.publication_id === pub.id)?.favourite)
+    const matchesFavorites = !showFavorites || (isSaved && savedPublications.find(saved => saved?.publication_id === pub?.id)?.favourite)
     return matchesSearch && matchesFilter && matchesFavorites
   })
 
@@ -100,7 +100,7 @@ export default function Publications() {
       
       // Update with server response
       setSavedPublications(prev => prev.map(pub => 
-        pub.id === updatedSavedPub.id ? updatedSavedPub : pub
+        pub.id === updatedSavedPub?.id ? updatedSavedPub : pub
       ))
     } catch (error) {
       // Revert optimistic update on error
@@ -134,12 +134,12 @@ export default function Publications() {
   }
 
   const renderPublicationCard = (pub) => {
-    const savedPub = savedPublications.find(saved => saved?.publication_id === pub.id)
+    const savedPub = savedPublications.find(saved => saved?.publication_id === pub?.id)
     const isSaved = !!savedPub
     const isFavorite = isSaved && savedPub.favourite
 
     return (
-      <Card key={pub.id} className="overflow-hidden">
+      <Card key={pub?.id} className="overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-700 text-white p-4">
           <div className="flex justify-between items-center">
             <CardTitle className="text-lg font-semibold">{pub.title}</CardTitle>
@@ -150,11 +150,11 @@ export default function Publications() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => toggleFavorite(pub.id)}
+                onClick={() => toggleFavorite(pub?.id)}
                 className="text-white hover:text-teal-200"
-                disabled={isFavoriteLoading[pub.id]}
+                disabled={isFavoriteLoading[pub?.id]}
               >
-                {isFavoriteLoading[pub.id] ? (
+                {isFavoriteLoading[pub?.id] ? (
                   <Skeleton className="h-5 w-5 rounded-full bg-white/50" />
                 ) : (
                   <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
@@ -172,7 +172,7 @@ export default function Publications() {
             variant="outline" 
             size="sm" 
             className="text-teal-600 hover:text-teal-700"
-            onClick={() => handleReadArticle(pub.id)}
+            onClick={() => handleReadArticle(pub?.id)}
           >
             {isSaved ? 'Read Again' : 'Read Full Article'}
           </Button>
@@ -245,7 +245,7 @@ export default function Publications() {
             <h2 className="text-2xl font-bold text-teal-600 mb-4">Favorite Publications</h2>
             <div className="space-y-4">
               {favoritePublications.map(savedPub => {
-                const pub = publications.find(p => p.id === savedPub?.publication_id)
+                const pub = publications.find(p => p?.id === savedPub?.publication_id)
                 return pub ? renderPublicationCard(pub) : null
               })}
             </div>
