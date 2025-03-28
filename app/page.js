@@ -39,7 +39,7 @@ export default function Home() {
             <div className="flex items-center justify-center">
               <div className="relative h-[450px] w-full overflow-hidden rounded-lg">
                 <Image
-                  src="/placeholder.svg?height=450&width=600"
+                  src="/images/logo.jpg"
                   alt="Medical research illustration"
                   fill
                   className="object-cover"
@@ -123,7 +123,7 @@ export default function Home() {
             <div className="flex items-center justify-center">
               <div className="relative h-[450px] w-full overflow-hidden rounded-lg">
                 <Image
-                  src="/placeholder.svg?height=450&width=600"
+                  src="/images/dp.png"
                   alt="Dr. Sailaja Sanikommu"
                   fill
                   className="object-cover"
