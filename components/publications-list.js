@@ -164,13 +164,6 @@ function PublicationCard({ publication, isAuthenticated }) {
 
   return (
     <Card className="overflow-hidden flex flex-col h-full">
-      <CardHeader className="p-0">
-        <div className="h-48 w-full bg-muted relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-muted-foreground">Publication Cover</span>
-          </div>
-        </div>
-      </CardHeader>
       <CardContent className="p-6 flex-grow">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
