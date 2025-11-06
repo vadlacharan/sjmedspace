@@ -471,16 +471,7 @@ export default function PublicationDetail({ id }) {
           </Button>
         </div>
 
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2" asChild>
-              <Link href={`/admin/publications/edit/${id}`}>
-                <Edit className="h-4 w-4" />
-                Edit
-              </Link>
-            </Button>
-          </div>
-        )}
+       
       </div>
 
       <Separator />

@@ -223,12 +223,7 @@ export default function AdminPublicationsList() {
                             View
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/publications/edit/${publication.id}`}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </Link>
-                        </DropdownMenuItem>
+                       
                         <DropdownMenuItem onClick={() => handleDeleteClick(publication)}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
@@ -290,12 +285,7 @@ export default function AdminPublicationsList() {
                           View
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/publications/edit/${publication.id}`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </Link>
-                      </DropdownMenuItem>
+                   
                       <DropdownMenuItem onClick={() => handleDeleteClick(publication)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
