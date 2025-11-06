@@ -1,39 +1,53 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { db, storage } from "@/lib/firebase"
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { useAuth } from "@/lib/auth"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { X, Plus, Upload, Save, ArrowLeft } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { db, storage } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { X, Plus, Upload, Save, ArrowLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 export default function NewPublicationPage() {
-  const { user, loading, isAdmin } = useAuth()
-  const router = useRouter()
-  const { toast } = useToast()
+  const { user, loading, isAdmin } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const [title, setTitle] = useState("")
-  const [category, setCategory] = useState("")
-  const [excerpt, setExcerpt] = useState("")
-  const [content, setContent] = useState("")
-  const [coverImage, setCoverImage] = useState(null)
-  const [coverImagePreview, setCoverImagePreview] = useState("")
-  const [tags, setTags] = useState([])
-  const [currentTag, setCurrentTag] = useState("")
-  const [authors, setAuthors] = useState([{ name: "", title: "", avatar: "" }])
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [previewTab, setPreviewTab] = useState("edit")
+  const [title, setTitle] = useState("");
+  const [doiLink, setDoiLink] = useState("");
+  const [category, setCategory] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const [coverImagePreview, setCoverImagePreview] = useState("");
+  const [tags, setTags] = useState([]);
+  const [currentTag, setCurrentTag] = useState("");
+  const [authors, setAuthors] = useState([{ name: "", title: "", avatar: "" }]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewTab, setPreviewTab] = useState("edit");
 
   // Categories for the dropdown
   const categories = [
@@ -43,63 +57,63 @@ export default function NewPublicationPage() {
     "Clinical Skills",
     "Medical Education",
     "Research Methodology",
-  ]
+  ];
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
-      router.push("/")
+      router.push("/");
     }
-  }, [user, loading, isAdmin, router])
+  }, [user, loading, isAdmin, router]);
 
   const handleCoverImageChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
-      setCoverImage(file)
-      const reader = new FileReader()
+      setCoverImage(file);
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverImagePreview(reader.result)
-      }
-      reader.readAsDataURL(file)
+        setCoverImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleAddTag = () => {
     if (currentTag.trim() && !tags.includes(currentTag.trim())) {
-      setTags([...tags, currentTag.trim()])
-      setCurrentTag("")
+      setTags([...tags, currentTag.trim()]);
+      setCurrentTag("");
     }
-  }
+  };
 
   const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
-  }
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
 
   const handleAddAuthor = () => {
-    setAuthors([...authors, { name: "", title: "", avatar: "" }])
-  }
+    setAuthors([...authors, { name: "", title: "", avatar: "" }]);
+  };
 
   const handleRemoveAuthor = (index) => {
-    const newAuthors = [...authors]
-    newAuthors.splice(index, 1)
-    setAuthors(newAuthors)
-  }
+    const newAuthors = [...authors];
+    newAuthors.splice(index, 1);
+    setAuthors(newAuthors);
+  };
 
   const handleAuthorChange = (index, field, value) => {
-    const newAuthors = [...authors]
-    newAuthors[index][field] = value
-    setAuthors(newAuthors)
-  }
+    const newAuthors = [...authors];
+    newAuthors[index][field] = value;
+    setAuthors(newAuthors);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!title || !category || !excerpt || !content) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (authors.length === 0 || !authors[0].name) {
@@ -107,23 +121,26 @@ export default function NewPublicationPage() {
         title: "Author required",
         description: "Please add at least one author.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
       // Upload cover image if provided
-      let coverImageUrl = ""
+      let coverImageUrl = "";
       if (coverImage) {
-        const storageRef = ref(storage, `publications/covers/${Date.now()}_${coverImage.name}`)
-        await uploadBytes(storageRef, coverImage)
-        coverImageUrl = await getDownloadURL(storageRef)
+        const storageRef = ref(
+          storage,
+          `publications/covers/${Date.now()}_${coverImage.name}`
+        );
+        await uploadBytes(storageRef, coverImage);
+        coverImageUrl = await getDownloadURL(storageRef);
       }
 
       // Filter out empty authors
-      const validAuthors = authors.filter((author) => author.name.trim())
+      const validAuthors = authors.filter((author) => author.name.trim());
 
       // Create publication document
       const publicationData = {
@@ -133,6 +150,7 @@ export default function NewPublicationPage() {
         content,
         coverImageUrl,
         tags,
+          doiLink, //
         authors: validAuthors,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -142,34 +160,37 @@ export default function NewPublicationPage() {
         likedBy: [],
         savedBy: [],
         status: "published",
-      }
+      };
 
-      const docRef = await addDoc(collection(db, "publications"), publicationData)
+      const docRef = await addDoc(
+        collection(db, "publications"),
+        publicationData
+      );
 
       toast({
         title: "Publication created",
         description: "Your publication has been successfully created.",
-      })
+      });
 
-      router.push(`/publications/${docRef.id}`)
+      router.push(`/publications/${docRef.id}`);
     } catch (error) {
-      console.error("Error creating publication:", error)
+      console.error("Error creating publication:", error);
       toast({
         title: "Error",
         description: "Failed to create publication. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (loading || !user) {
-    return <div className="container py-12">Loading...</div>
+    return <div className="container py-12">Loading...</div>;
   }
 
   if (!isAdmin) {
-    return null // Will redirect in useEffect
+    return null; // Will redirect in useEffect
   }
 
   return (
@@ -183,15 +204,25 @@ export default function NewPublicationPage() {
                 <span className="sr-only">Back</span>
               </Link>
             </Button>
-            <h1 className="text-3xl font-bold tracking-tight">Create New Publication</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Create New Publication
+            </h1>
           </div>
-          <Button onClick={handleSubmit} disabled={isSubmitting} className="gap-2">
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="gap-2"
+          >
             <Save className="h-4 w-4" />
             {isSubmitting ? "Publishing..." : "Publish"}
           </Button>
         </div>
 
-        <Tabs value={previewTab} onValueChange={setPreviewTab} className="space-y-4">
+        <Tabs
+          value={previewTab}
+          onValueChange={setPreviewTab}
+          className="space-y-4"
+        >
           <TabsList>
             <TabsTrigger value="edit">Edit</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -201,7 +232,9 @@ export default function NewPublicationPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Publication Details</CardTitle>
-                <CardDescription>Enter the basic information about your publication.</CardDescription>
+                <CardDescription>
+                  Enter the basic information about your publication.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -242,6 +275,17 @@ export default function NewPublicationPage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="doi-link">DOI / External Link</Label>
+                  <Input
+                    id="doi-link"
+                    placeholder="Enter DOI or external publication link (e.g., https://doi.org/...)"
+                    value={doiLink}
+                    onChange={(e) => setDoiLink(e.target.value)}
+                    type="url"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="content">Content</Label>
                   <Textarea
                     id="content"
@@ -258,7 +302,9 @@ export default function NewPublicationPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => document.getElementById("cover-image").click()}
+                      onClick={() =>
+                        document.getElementById("cover-image").click()
+                      }
                       className="gap-2"
                     >
                       <Upload className="h-4 w-4" />
@@ -293,12 +339,17 @@ export default function NewPublicationPage() {
                       onChange={(e) => setCurrentTag(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          e.preventDefault()
-                          handleAddTag()
+                          e.preventDefault();
+                          handleAddTag();
                         }
                       }}
                     />
-                    <Button type="button" variant="outline" onClick={handleAddTag} disabled={!currentTag.trim()}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddTag}
+                      disabled={!currentTag.trim()}
+                    >
                       <Plus className="h-4 w-4" />
                       <span className="sr-only">Add Tag</span>
                     </Button>
@@ -327,11 +378,16 @@ export default function NewPublicationPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Authors</CardTitle>
-                <CardDescription>Add the authors of this publication.</CardDescription>
+                <CardDescription>
+                  Add the authors of this publication.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {authors.map((author, index) => (
-                  <div key={index} className="space-y-4 p-4 border rounded-lg relative">
+                  <div
+                    key={index}
+                    className="space-y-4 p-4 border rounded-lg relative"
+                  >
                     {authors.length > 1 && (
                       <Button
                         type="button"
@@ -351,7 +407,9 @@ export default function NewPublicationPage() {
                         id={`author-name-${index}`}
                         placeholder="Author name"
                         value={author.name}
-                        onChange={(e) => handleAuthorChange(index, "name", e.target.value)}
+                        onChange={(e) =>
+                          handleAuthorChange(index, "name", e.target.value)
+                        }
                       />
                     </div>
 
@@ -361,29 +419,44 @@ export default function NewPublicationPage() {
                         id={`author-title-${index}`}
                         placeholder="Author title or role"
                         value={author.title}
-                        onChange={(e) => handleAuthorChange(index, "title", e.target.value)}
+                        onChange={(e) =>
+                          handleAuthorChange(index, "title", e.target.value)
+                        }
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor={`author-avatar-${index}`}>Avatar URL</Label>
+                      <Label htmlFor={`author-avatar-${index}`}>
+                        Avatar URL
+                      </Label>
                       <Input
                         id={`author-avatar-${index}`}
                         placeholder="URL to author's avatar image"
                         value={author.avatar}
-                        onChange={(e) => handleAuthorChange(index, "avatar", e.target.value)}
+                        onChange={(e) =>
+                          handleAuthorChange(index, "avatar", e.target.value)
+                        }
                       />
                     </div>
                   </div>
                 ))}
 
-                <Button type="button" variant="outline" onClick={handleAddAuthor} className="w-full gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddAuthor}
+                  className="w-full gap-2"
+                >
                   <Plus className="h-4 w-4" />
                   Add Another Author
                 </Button>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button onClick={handleSubmit} disabled={isSubmitting} className="gap-2">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="gap-2"
+                >
                   <Save className="h-4 w-4" />
                   {isSubmitting ? "Publishing..." : "Publish"}
                 </Button>
@@ -396,7 +469,9 @@ export default function NewPublicationPage() {
               <CardContent className="p-6">
                 <div className="space-y-8">
                   <div className="space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight">{title || "Publication Title"}</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                      {title || "Publication Title"}
+                    </h1>
                     <div className="flex items-center gap-2">
                       {category && <Badge variant="outline">{category}</Badge>}
                       <span className="text-sm text-muted-foreground">
@@ -422,12 +497,18 @@ export default function NewPublicationPage() {
                                 className="h-full w-full rounded-full object-cover"
                               />
                             ) : (
-                              <span className="text-sm font-medium">{author.name.charAt(0)}</span>
+                              <span className="text-sm font-medium">
+                                {author.name.charAt(0)}
+                              </span>
                             )}
                           </div>
                           <div>
                             <p className="text-sm font-medium">{author.name}</p>
-                            {author.title && <p className="text-xs text-muted-foreground">{author.title}</p>}
+                            {author.title && (
+                              <p className="text-xs text-muted-foreground">
+                                {author.title}
+                              </p>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -444,10 +525,16 @@ export default function NewPublicationPage() {
                   )}
 
                   <div className="space-y-4">
-                    <p className="text-lg font-medium">{excerpt || "Publication excerpt will appear here..."}</p>
+                    <p className="text-lg font-medium">
+                      {excerpt || "Publication excerpt will appear here..."}
+                    </p>
                     <div className="prose prose-gray dark:prose-invert max-w-none">
                       {content ? (
-                        <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, "<br />") }} />
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: content.replace(/\n/g, "<br />"),
+                          }}
+                        />
                       ) : (
                         <p>Publication content will appear here...</p>
                       )}
@@ -470,6 +557,5 @@ export default function NewPublicationPage() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }
-
