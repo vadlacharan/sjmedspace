@@ -382,12 +382,7 @@ export default function PublicationDetail({ id }) {
         </div>
       </div>
 
-      {/* Publication Cover Image */}
-      <div className="relative w-full h-[400px] bg-muted rounded-lg overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-muted-foreground">Publication Cover Image</span>
-        </div>
-      </div>
+     
 
       {/* Publication Content */}
       <div className="prose prose-gray dark:prose-invert max-w-none">
@@ -465,10 +460,7 @@ export default function PublicationDetail({ id }) {
             {isSaved ? "Saved" : "Save"}
           </Button>
 
-          <Button variant="outline" size="sm" className="gap-2">
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
+          <a href={publication.avatar} target="_blank" rel="noopener noreferrer">Read Full Article</a>
         </div>
 
        
