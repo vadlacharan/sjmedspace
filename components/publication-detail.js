@@ -460,7 +460,7 @@ export default function PublicationDetail({ id }) {
             {isSaved ? "Saved" : "Save"}
           </Button>
 
-          <a href={publication.avatar} target="_blank" rel="noopener noreferrer">Read Full Article</a>
+          <Link href={publication.doiLink} target="_blank" rel="noopener noreferrer">Read Full Article</Link>
         </div>
 
        
