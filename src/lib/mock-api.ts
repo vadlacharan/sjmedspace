@@ -113,7 +113,7 @@ export const api = {
   }
 
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/${collection}?${queryParams.toString()}`
+    `http://localhost:3000/api/${collection}?${queryParams.toString()}`
   );
 
   const data = await res.json();
@@ -151,7 +151,7 @@ export const api = {
   const collection = type === 'blog' ? 'blogs' : 'publications';
 
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/${collection}/${id}?depth=2`
+    `http://localhost:3000/api/${collection}/${id}?depth=2`
   );
 
   if (!res.ok) {
@@ -196,7 +196,7 @@ export const api = {
   if (!token) throw new Error('Unauthorized');
 
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/${collection}/${contentId}/toggle-like`,
+    `http://localhost:3000/api/${collection}/${contentId}/toggle-like`,
     {
       method: 'POST',
       headers: {
@@ -226,7 +226,7 @@ async addComment(
   if (!token) throw new Error('Unauthorized')
 
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/${collection}/${contentId}/add-comment`,
+    `http://localhost:3000/api/${collection}/${contentId}/add-comment`,
     {
       method: 'POST',
       headers: {
@@ -275,7 +275,7 @@ async addComment(
 
   // 1️⃣ Fetch existing document with comments
   const existingRes = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/${collection}/${contentId}?depth=2`
+    `http://localhost:3000/api/${collection}/${contentId}?depth=2`
   );
 
   if (!existingRes.ok) throw new Error('Not found');
@@ -304,7 +304,7 @@ async addComment(
 
   // 4️⃣ PATCH updated array
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/${collection}/${contentId}`,
+    `http://localhost:3000/api/${collection}/${contentId}`,
     {
       method: 'PATCH',
       headers: {
@@ -337,7 +337,7 @@ async getGalleryEvents(
   searchParams.append('limit', limit.toString());
 
   // 🔥 IMPORTANT: populate relations (thumbnail)
-
+  
 
   // 🔥 Payload tag filtering (array field)
   if (tags && tags.length > 0) {
@@ -347,7 +347,7 @@ async getGalleryEvents(
   }
 
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/gallery?${searchParams.toString()}`,
+    `http://localhost:3000/api/gallery?${searchParams.toString()}`,
     {
       headers: {
         'Content-Type': 'application/json',
@@ -385,7 +385,7 @@ async getGalleryEvents(
   const token = localStorage.getItem('auth_token');
 
   const res = await fetch(
-    `https://sjmedspace-backend.vercel.app/api/gallery/${id}`,
+    `http://localhost:3000/api/gallery/${id}`,
     {
       headers: {
         'Content-Type': 'application/json',
@@ -423,7 +423,7 @@ async getGalleryEvents(
   email: string,
   password: string
 ): Promise<{ user: import('./types').User; token: string }> {
-  const response = await fetch('https://sjmedspace-backend.vercel.app/api/users/login', {
+  const response = await fetch('http://localhost:3000/api/users/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -460,7 +460,7 @@ async getGalleryEvents(
     throw new Error('Password must be at least 6 characters');
   }
 
-  const response = await fetch('https://sjmedspace-backend.vercel.app/api/users', {
+  const response = await fetch('http://localhost:3000/api/users', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -479,7 +479,7 @@ async getGalleryEvents(
   }
 
   // Auto-login after registration
-  const loginResponse = await fetch('https://sjmedspace-backend.vercel.app/api/users/login', {
+  const loginResponse = await fetch('http://localhost:3000/api/users/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),

@@ -72,7 +72,7 @@ export default function GalleryDetail() {
 
              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <img
-                  src={event.thumbnail.url}
+                   src={event.thumbnail?.url || "/placeholder.svg"}
                   alt={`${event.title} `}
                   className=" w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />

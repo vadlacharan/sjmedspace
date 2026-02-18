@@ -1,26 +1,29 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 //@ts-nocheck
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import { motion } from 'framer-motion';
-import { api } from '@/lib/mock-api';
-import type { GalleryEvent, PaginatedResponse } from '@/lib/types';
-import Layout from '@/components/layout/Layout';
-import PaginationControls from '@/components/content/PaginationControls';
-import SkeletonCard from '@/components/common/SkeletonCard';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { motion } from "framer-motion";
+import { api } from "@/lib/mock-api";
+import type { GalleryEvent, PaginatedResponse } from "@/lib/types";
+import Layout from "@/components/layout/Layout";
+import PaginationControls from "@/components/content/PaginationControls";
+import SkeletonCard from "@/components/common/SkeletonCard";
 
 export default function Gallery() {
-  const [data, setData] = useState<PaginatedResponse<GalleryEvent> | null>(null);
+  const [data, setData] = useState<PaginatedResponse<GalleryEvent> | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
 
-    api.getGalleryEvents({ page, limit: 6 })
+    api
+      .getGalleryEvents({ page, limit: 6 })
       .then(setData)
       .finally(() => setLoading(false));
   }, [page]);
@@ -61,12 +64,13 @@ export default function Gallery() {
                   >
                     <div className="relative h-52 overflow-hidden">
                       <img
-                        src={event.thumbnail.url}
-                        alt={event.title}
+                        src={event.thumbnail?.url || "/placeholder.svg"}
+                        alt={event.title || "Event image"}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder.svg';
+                          (e.currentTarget as HTMLImageElement).src =
+                            "/placeholder.svg";
                         }}
                       />
                     </div>
@@ -79,7 +83,7 @@ export default function Gallery() {
                       <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          {format(new Date(event.createdAt), 'MMM d, yyyy')}
+                          {format(new Date(event.createdAt), "MMM d, yyyy")}
                         </span>
                       </div>
                     </div>
