@@ -337,7 +337,7 @@ async getGalleryEvents(
   searchParams.append('limit', limit.toString());
 
   // 🔥 IMPORTANT: populate relations (thumbnail)
-  searchParams.append('depth', '1');
+
 
   // 🔥 Payload tag filtering (array field)
   if (tags && tags.length > 0) {
