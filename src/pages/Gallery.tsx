@@ -64,7 +64,7 @@ export default function Gallery() {
                   >
                     <div className="relative h-52 overflow-hidden">
                       <img
-                        src={event.thumbnail?.url || "/placeholder.svg"}
+                        src={event.thumbnail|| "/placeholder.svg"}
                         alt={event.title || "Event image"}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"

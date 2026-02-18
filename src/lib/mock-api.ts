@@ -407,7 +407,7 @@ async getGalleryEvents(
     createdAt: data.createdAt,
 
     // thumbnail will now be just an ID (number)
-    thumbnail: data.thumbnail, 
+    thumbnail: data.thumbnail.url, 
   };
 },
 
